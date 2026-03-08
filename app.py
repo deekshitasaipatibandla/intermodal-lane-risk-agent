@@ -181,7 +181,16 @@ st.markdown("---")
 # Sidebar
 with st.sidebar:
     st.header("⚙️ Settings")
-    api_key = st.text_input("Anthropic API Key (for AI briefs)", type="password", placeholder="sk-ant-...")
+    _secret_key = ""
+    try:
+        _secret_key = st.secrets.get("ANTHROPIC_API_KEY", "")
+    except:
+        pass
+    if _secret_key:
+        api_key = _secret_key
+        st.success("AI briefs active", icon="🤖")
+    else:
+        api_key = st.text_input("Anthropic API Key (for AI briefs)", type="password", placeholder="sk-ant-...")
     radius = st.slider("Alert Radius (miles)", 100, 500, 350, 50)
     show_low = st.checkbox("Show LOW risk lanes", value=False)
     st.markdown("---")
@@ -209,6 +218,37 @@ col3.metric("📡 Active Hazard Events", len(all_events))
 col4.metric("🛣️ Corridors Monitored", len(FREIGHT_LANES))
 
 st.markdown("---")
+
+# ── BOOKING RECOMMENDATION PANEL ────────────────────────────
+sorted_lanes = sorted(lane_risk.items(), key=lambda x: -x[1]['risk_score'])
+top_lid, top_data = sorted_lanes[0]
+safe_lanes = [(lid, d) for lid, d in sorted_lanes if d['risk_level'] == "LOW" and d['count'] == 0]
+best_alt = safe_lanes[0] if safe_lanes else sorted_lanes[-1]
+
+if top_data['risk_level'] == "HIGH":
+    rec_color = "#ff4b4b"
+    rec_icon = "🔴"
+    rec_action = f"**AVOID {top_lid} today.** Risk score {top_data['risk_score']}/100 — active disruption events within corridor range."
+    alt_text = f"**Best alternative:** {best_alt[0]} ({best_alt[1]['name']}) — Risk score {best_alt[1]['risk_score']}/100, {best_alt[1]['count']} active events."
+elif top_data['risk_level'] == "MEDIUM":
+    rec_color = "#ffa500"
+    rec_icon = "🟡"
+    rec_action = f"**MONITOR {top_lid} before booking.** Risk score {top_data['risk_score']}/100 — elevated disruption signals present."
+    alt_text = f"**Safer option:** {best_alt[0]} ({best_alt[1]['name']}) — Risk score {best_alt[1]['risk_score']}/100."
+else:
+    rec_color = "#00cc66"
+    rec_icon = "🟢"
+    rec_action = "**All monitored corridors are LOW risk.** Safe to book on any tracked lane."
+    alt_text = "No rerouting required at this time."
+
+st.markdown(f"""
+<div style='background:#0e1a2b;border:1px solid {rec_color};border-left:6px solid {rec_color};
+padding:16px 20px;border-radius:6px;margin-bottom:16px;'>
+<span style='color:{rec_color};font-size:16px;font-weight:bold;'>{rec_icon} Booking Recommendation</span><br><br>
+<span style='color:#eee;font-size:14px;'>{rec_action}</span><br>
+<span style='color:#aaa;font-size:13px;margin-top:6px;display:block;'>{alt_text}</span>
+</div>
+""", unsafe_allow_html=True)
 
 # Build risk table
 rows = []
