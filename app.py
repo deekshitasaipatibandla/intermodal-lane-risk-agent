@@ -231,7 +231,7 @@ col_left, col_right = st.columns([1.2, 1])
 with col_left:
     st.subheader("🗺️ Lane Risk Ranking")
     st.dataframe(
-        risk_df.style.background_gradient(subset=["Risk Score"], cmap="RdYlGn_r"),
+        risk_df,
         use_container_width=True, height=420
     )
 
