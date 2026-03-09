@@ -264,7 +264,7 @@ for lid, data in lane_risk.items():
         "Events": data['count'],
     })
 
-risk_df = pd.DataFrame(rows).sort_values("Risk Score", ascending=False).reset_index(drop=True)
+risk_df = pd.DataFrame(rows, columns=["Lane","Corridor","Risk Score","Level","Events"]).sort_values("Risk Score", ascending=False).reset_index(drop=True) if rows else pd.DataFrame(columns=["Lane","Corridor","Risk Score","Level","Events"])
 
 col_left, col_right = st.columns([1.2, 1])
 
