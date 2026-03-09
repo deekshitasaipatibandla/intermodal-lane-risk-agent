@@ -309,7 +309,7 @@ for ev in all_events:
         "Nearest Lane": top_lane,
         "Impact Score": impacts[0]['impact'] if impacts else 0,
     })
-ev_df = pd.DataFrame(ev_rows).sort_values("Impact Score", ascending=False).reset_index(drop=True)
+ev_df = pd.DataFrame(ev_rows, columns=["Source","Event Type","Headline","Severity","Nearest Lane","Impact Score"]).sort_values("Impact Score", ascending=False).reset_index(drop=True) if ev_rows else pd.DataFrame(columns=["Source","Event Type","Headline","Severity","Nearest Lane","Impact Score"])
 st.dataframe(ev_df, use_container_width=True, height=280)
 
 st.markdown("---")
